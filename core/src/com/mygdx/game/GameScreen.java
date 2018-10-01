@@ -23,6 +23,7 @@ public class GameScreen implements Screen {
 	OrthographicCamera camera;
 	Texture imageDrop;
 	Texture imageBucket;
+	Texture imageBackground;
 	Sound soundDrop;
 	Music musicRain;
 
@@ -33,6 +34,7 @@ public class GameScreen implements Screen {
 	long lastDropTime;
 
 	int dropsGatchered;
+	boolean isPause = false;
 
 	public GameScreen (final DropGame game) {
 		this.game = game;
@@ -42,6 +44,7 @@ public class GameScreen implements Screen {
 
 		imageDrop = new Texture("droplet.png");
 		imageBucket = new Texture("bucket.png");
+		imageBackground = new Texture("bg.png");
 		soundDrop = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
 		musicRain = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
 		touchPos = new Vector3();
@@ -71,6 +74,7 @@ public class GameScreen implements Screen {
 	@Override
 	public void pause() {
 		musicRain.pause();
+		isPause = true;
 	}
 
 	@Override
@@ -96,14 +100,33 @@ public class GameScreen implements Screen {
 
 		game.batch.setProjectionMatrix(camera.combined);
 		game.batch.begin();
-		game.font.draw(game.batch, "Drops Collected: " + dropsGatchered, 0, 480);
-		game.batch.draw(imageBucket, rectBucket.x, rectBucket.y);
 
-		for (Rectangle drop : drops) {
-			game.batch.draw(imageDrop, drop.x, drop.y);
+		if (isPause) {
+			game.font.draw(game.batch, "Tap for continue", 800/2, 480/2);
+		} else {
+
+			// background image
+			game.batch.disableBlending();
+			game.batch.draw(imageBackground, 0, 0);
+			game.batch.enableBlending();
+
+
+			game.font.draw(game.batch, "Drops Collected: " + dropsGatchered, 0, 480);
+			game.batch.draw(imageBucket, rectBucket.x, rectBucket.y);
+
+			for (Rectangle drop : drops) {
+				game.batch.draw(imageDrop, drop.x, drop.y);
+			}
 		}
 
 		game.batch.end();
+
+		if (isPause) {
+			if (Gdx.input.isTouched()) {
+				isPause = false;
+			}
+			return;
+		}
 
 		if (Gdx.input.isTouched()) {
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
@@ -155,6 +178,7 @@ public class GameScreen implements Screen {
 	public void dispose () {
 		imageBucket.dispose();
 		imageDrop.dispose();
+		imageBackground.dispose();
 		soundDrop.dispose();
 		musicRain.dispose();
 	}
