@@ -4,20 +4,32 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.utils.TextFont;
+import com.mygdx.game.widget.TextButton;
+import com.mygdx.game.widget.ToggleButton;
 
 class MainMenuScreen implements Screen {
 
 
     final DropGame game;
     OrthographicCamera camera;
+    TextButton btnStart;
+    ToggleButton btnMusic;
+
+    Vector3 touchPos;
 
 
     public MainMenuScreen(final DropGame game) {
         this.game = game;
 
+        touchPos = new Vector3();
+
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
+        btnStart = new TextButton("Start game", TextFont.getRusso(), 100, 100);
+        btnMusic = new ToggleButton("Music", TextFont.getRusso(), 100, 50);
+        btnMusic.setCheck(Gdx.app.getPreferences("Settings").getBoolean("isMusic"));
     }
 
     @Override
@@ -35,15 +47,24 @@ class MainMenuScreen implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         TextFont.getRusso().draw(game.batch, "Welcome to Drop!", 100, 150);
-        TextFont.getRusso().draw(game.batch, "Старт!", 100, 100);
-
-
+        btnStart.draw(game.batch);
+        btnMusic.draw(game.batch);
 
         game.batch.end();
 
         if (Gdx.input.isTouched()){
-            game.setScreen(new GameScreen(game));
-            dispose();
+            touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(touchPos);
+            if (btnStart.isClick(touchPos)) {
+                game.setScreen(new GameScreen(game));
+                dispose();
+            }
+
+            if (btnMusic.isClick(touchPos)) {
+                btnMusic.toggle();
+                Gdx.app.getPreferences("Settings").putBoolean("isMusic", btnMusic.isCheck());
+                Gdx.app.getPreferences("Settings").flush();
+            }
         }
 
     }
@@ -70,5 +91,6 @@ class MainMenuScreen implements Screen {
 
     @Override
     public void dispose() {
+        btnMusic.dispose();
     }
 }

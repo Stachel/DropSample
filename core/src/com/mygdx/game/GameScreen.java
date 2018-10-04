@@ -79,7 +79,9 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void resume() {
-		musicRain.play();
+		if (Gdx.app.getPreferences("Settings").getBoolean("isMusic")) {
+			musicRain.play();
+		}
 	}
 
 	@Override
@@ -89,7 +91,9 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void show() {
-		musicRain.play();
+		if (Gdx.app.getPreferences("Settings").getBoolean("isMusic")) {
+			musicRain.play();
+		}
 	}
 
 	@Override
